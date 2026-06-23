@@ -1,36 +1,35 @@
 name: cricz_tv
-  description: "CricZ TV - Live Sports Streaming Application"
-  publish_to: 'none'
-  version: 3.0.0+3
+description: "CricZ TV - Live Sports Streaming Application"
+publish_to: 'none'
+version: 3.0.0+3
 
-  environment:
-    sdk: '>=3.3.0 <4.0.0'
+environment:
+  sdk: '>=3.3.0 <4.0.0'
 
-  dependencies:
-    flutter:
-      sdk: flutter
-    cupertino_icons: ^1.0.6
-    media_kit: ^1.2.6
-    media_kit_video: ^2.0.1
-    media_kit_libs_video: ^1.0.4
-    http: ^1.2.1
-    wakelock_plus: ^1.4.0
-    shared_preferences: ^2.2.3
-    path_provider: ^2.1.4
-    share_plus: ^10.0.3
-    flutter_local_notifications: ^18.0.0
-    cached_network_image: ^3.4.1
-
-  dependency_overrides:
-    package_info_plus: ^8.1.3
-
-  dev_dependencies:
-    flutter_test:
-      sdk: flutter
-    flutter_lints: ^3.0.0
-
+dependencies:
   flutter:
-    uses-material-design: true
-    assets:
-      - assets/icon/
-  
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  media_kit: ^1.2.6
+  media_kit_video: ^2.0.1
+  media_kit_libs_video: ^1.0.4
+  http: ^1.2.1
+  wakelock_plus: ^1.4.0
+  shared_preferences: ^2.2.3
+  path_provider: ^2.1.4
+  share_plus: ^10.0.3
+  flutter_local_notifications: ^18.0.0
+  cached_network_image: ^3.4.1
+
+dependency_overrides:
+  package_info_plus: ^8.1.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/icon/
