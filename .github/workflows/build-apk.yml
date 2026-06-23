@@ -34,9 +34,10 @@ jobs:
         with:
           ndk-version: r27
 
-      - name: Generate app icons
+      - name: Generate app icons from CricZ logo
         run: |
-          declare -A sizes=(mdpi=48 hdpi=72 xhdpi=96 xxhdpi=144 xxxhdpi=192)
+          sudo apt-get install -y imagemagick -q
+          declare -A sizes
           for density in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
             case $density in
               mdpi)    px=48 ;;
@@ -47,8 +48,8 @@ jobs:
             esac
             dir=android/app/src/main/res/mipmap-${density}
             mkdir -p "$dir"
-            convert -size ${px}x${px} xc:#1565C0 "$dir/ic_launcher.png"
-            echo "Created ${density} ${px}x${px} icon"
+            convert assets/icon/app_icon.png -resize ${px}x${px} "$dir/ic_launcher.png"
+            echo "Created ${density} ${px}x${px} icon from CricZ logo"
           done
 
       - name: Get dependencies
@@ -80,7 +81,7 @@ jobs:
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
-          name: CricZ-TV-Release
+          name: CricZ-TV-v2-Release
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
 
@@ -90,6 +91,7 @@ jobs:
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: CricZ-TV-Debug
+          name: CricZ-TV-v2-Debug
           path: build/app/outputs/flutter-apk/app-debug.apk
           retention-days: 7
+
