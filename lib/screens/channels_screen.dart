@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+  import 'package:cached_network_image/cached_network_image.dart';
   import '../models/channel_model.dart';
   import '../services/firestore_service.dart';
   import '../services/favorites_service.dart';
@@ -26,159 +27,269 @@ import 'package:flutter/material.dart';
     Widget build(BuildContext context) {
       return Scaffold(
         backgroundColor: Colors.black,
-        appBar: AppBar(
-          backgroundColor: Colors.black,
-          elevation: 0,
-          automaticallyImplyLeading: widget.filterCategory != null,
-          leading: widget.filterCategory != null
-              ? IconButton(
+        appBar: widget.filterCategory != null
+            ? AppBar(
+                backgroundColor: Colors.black,
+                elevation: 0,
+                leading: IconButton(
                   icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
                   onPressed: () => Navigator.pop(context),
-                )
-              : null,
-          title: Row(children: [
-            const Icon(Icons.live_tv_rounded, color: Color(0xFF00D2FF), size: 20),
-            const SizedBox(width: 8),
-            Text(widget.filterCategory ?? 'Sports',
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
-          ]),
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(56),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
-              child: TextField(
-                controller: _ctrl,
-                onChanged: (v) => setState(() => _search = v),
-                style: const TextStyle(color: Colors.white, fontSize: 14),
-                decoration: InputDecoration(
-                  hintText: 'Search channels...',
-                  hintStyle: const TextStyle(color: Colors.white30, fontSize: 14),
-                  prefixIcon: const Icon(Icons.search_rounded, color: Colors.white30, size: 20),
-                  suffixIcon: _search.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.close_rounded, color: Colors.white30, size: 18),
-                          onPressed: () { _ctrl.clear(); setState(() => _search = ''); })
-                      : null,
-                  filled: true,
-                  fillColor: const Color(0xFF0A1219),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF1A2530))),
-                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF1A2530))),
-                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF00D2FF), width: 1.5)),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                ),
+                title: Text(
+                  widget.filterCategory!,
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.search_rounded, color: Colors.white),
+                    onPressed: () => _showSearch(context),
+                  ),
+                ],
+              )
+            : null,
+        body: Column(
+          children: [
+            if (widget.filterCategory == null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+                child: TextField(
+                  controller: _ctrl,
+                  onChanged: (v) => setState(() => _search = v.toLowerCase()),
+                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                  decoration: InputDecoration(
+                    hintText: 'Search channels...',
+                    hintStyle: const TextStyle(color: Colors.white38),
+                    prefixIcon: const Icon(Icons.search_rounded, color: Colors.white38, size: 20),
+                    suffixIcon: _search.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear_rounded, color: Colors.white38, size: 18),
+                            onPressed: () {
+                              _ctrl.clear();
+                              setState(() => _search = '');
+                            },
+                          )
+                        : null,
+                    filled: true,
+                    fillColor: const Color(0xFF1A1A1A),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
                 ),
               ),
+            Expanded(
+              child: StreamBuilder<List<Channel>>(
+                stream: FirestoreService.channelsStream(),
+                builder: (ctx, snap) {
+                  if (snap.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator(color: Color(0xFF08C7D6)));
+                  }
+                  var channels = snap.data ?? [];
+                  if (widget.filterCategory != null) {
+                    channels = channels.where((c) => c.category == widget.filterCategory).toList();
+                  }
+                  if (_search.isNotEmpty) {
+                    channels = channels.where((c) => c.name.toLowerCase().contains(_search)).toList();
+                  }
+                  if (channels.isEmpty) {
+                    return const Center(
+                      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                        Icon(Icons.tv_off_rounded, color: Colors.white12, size: 64),
+                        SizedBox(height: 12),
+                        Text('No channels found', style: TextStyle(color: Colors.white38, fontSize: 15)),
+                      ]),
+                    );
+                  }
+                  return GridView.builder(
+                    padding: const EdgeInsets.all(8),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                      childAspectRatio: 0.78,
+                      crossAxisSpacing: 6,
+                      mainAxisSpacing: 6,
+                    ),
+                    itemCount: channels.length,
+                    itemBuilder: (ctx, i) => _ChannelTile(channel: channels[i]),
+                  );
+                },
+              ),
             ),
-          ),
-        ),
-        body: StreamBuilder<List<Channel>>(
-          stream: FirestoreService.channelsStream(),
-          builder: (ctx, snap) {
-            if (snap.connectionState == ConnectionState.waiting && !snap.hasData) {
-              return const Center(child: CircularProgressIndicator(color: Color(0xFF00D2FF), strokeWidth: 2));
-            }
-            var list = snap.data ?? ChannelData.defaultChannels;
-            if (widget.filterCategory != null) list = list.where((c) => c.category == widget.filterCategory).toList();
-            if (_search.isNotEmpty) list = list.where((c) => c.name.toLowerCase().contains(_search.toLowerCase())).toList();
-            if (list.isEmpty) {
-              return Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                const Icon(Icons.search_off_rounded, color: Colors.white24, size: 56),
-                const SizedBox(height: 14),
-                const Text('No channels found', style: TextStyle(color: Colors.white54, fontSize: 16, fontWeight: FontWeight.w600)),
-              ]));
-            }
-            return ListView.builder(
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 20),
-              itemCount: list.length,
-              itemBuilder: (_, i) => _ChannelCard(channel: list[i]),
-            );
-          },
+          ],
         ),
       );
     }
+
+    void _showSearch(BuildContext context) {
+      showSearch(context: context, delegate: _ChannelSearchDelegate());
+    }
   }
 
-  class _ChannelCard extends StatefulWidget {
+  class _ChannelTile extends StatefulWidget {
     final Channel channel;
-    const _ChannelCard({required this.channel});
+    const _ChannelTile({required this.channel});
+
     @override
-    State<_ChannelCard> createState() => _ChannelCardState();
+    State<_ChannelTile> createState() => _ChannelTileState();
   }
 
-  class _ChannelCardState extends State<_ChannelCard> {
+  class _ChannelTileState extends State<_ChannelTile> {
     bool _isFav = false;
 
     @override
     void initState() {
       super.initState();
-      _loadFav();
-    }
-
-    Future<void> _loadFav() async {
-      final fav = await FavoritesService.isFavorite(widget.channel.id);
-      if (mounted) setState(() => _isFav = fav);
-    }
-
-    Future<void> _toggleFav() async {
-      final newState = await FavoritesService.toggleFavorite(widget.channel.id);
-      if (mounted) {
-        setState(() => _isFav = newState);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(newState ? '❤️ Added to Favorites' : '💔 Removed from Favorites'),
-          duration: const Duration(seconds: 2),
-        ));
-      }
+      FavoritesService.isFavorite(widget.channel.id).then((v) {
+        if (mounted) setState(() => _isFav = v);
+      });
     }
 
     @override
     Widget build(BuildContext context) {
       return GestureDetector(
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(channel: widget.channel))),
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: const Color(0xFF040C12),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: _isFav ? const Color(0xFFFF4081).withOpacity(0.2) : Colors.white.withOpacity(0.06)),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => PlayerScreen(channel: widget.channel),
           ),
-          child: Row(children: [
-            Container(
-              width: 58, height: 58,
-              decoration: BoxDecoration(color: const Color(0xFF0A1825), borderRadius: BorderRadius.circular(12)),
-              child: widget.channel.logoUrl.isNotEmpty
-                  ? ClipRRect(borderRadius: BorderRadius.circular(12),
-                      child: Image.network(widget.channel.logoUrl, fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) => const Icon(Icons.live_tv_rounded, color: Color(0xFF00D2FF), size: 28)))
-                  : const Icon(Icons.live_tv_rounded, color: Color(0xFF00D2FF), size: 28),
-            ),
-            const SizedBox(width: 14),
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(widget.channel.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14), overflow: TextOverflow.ellipsis),
-              const SizedBox(height: 6),
-              Row(children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(color: const Color(0xFF00D2FF).withOpacity(0.12), borderRadius: BorderRadius.circular(5), border: Border.all(color: const Color(0xFF00D2FF).withOpacity(0.25))),
-                  child: Text(widget.channel.category, style: const TextStyle(color: Color(0xFF00D2FF), fontSize: 10, fontWeight: FontWeight.w600)),
-                ),
-                const SizedBox(width: 8),
-                const Icon(Icons.circle, color: Colors.red, size: 7),
-                const SizedBox(width: 4),
-                const Text('LIVE', style: TextStyle(color: Colors.red, fontSize: 10, fontWeight: FontWeight.bold)),
-              ]),
-            ])),
-            IconButton(
-              icon: Icon(_isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                  color: _isFav ? const Color(0xFFFF4081) : Colors.white30, size: 22),
-              onPressed: _toggleFav,
-            ),
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(color: const Color(0xFF00D2FF).withOpacity(0.1), shape: BoxShape.circle, border: Border.all(color: const Color(0xFF00D2FF).withOpacity(0.25))),
-              child: const Icon(Icons.play_arrow_rounded, color: Color(0xFF00D2FF), size: 22),
-            ),
-          ]),
         ),
+        onLongPress: () async {
+          await FavoritesService.toggle(widget.channel.id, widget.channel.name);
+          final fav = await FavoritesService.isFavorite(widget.channel.id);
+          if (mounted) {
+            setState(() => _isFav = fav);
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(fav ? 'Added to favorites' : 'Removed from favorites'),
+              duration: const Duration(seconds: 1),
+              backgroundColor: const Color(0xFF1A1A1A),
+            ));
+          }
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF111111),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Circular logo
+              Container(
+                width: 56,
+                height: 56,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xFF1E1E1E),
+                ),
+                child: ClipOval(
+                  child: widget.channel.logoUrl.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: widget.channel.logoUrl,
+                          fit: BoxFit.cover,
+                          placeholder: (_, __) => const Center(
+                            child: Icon(Icons.live_tv_rounded, color: Color(0xFF08C7D6), size: 24),
+                          ),
+                          errorWidget: (_, __, ___) => Center(
+                            child: Text(
+                              widget.channel.name.isNotEmpty
+                                  ? widget.channel.name[0].toUpperCase()
+                                  : '?',
+                              style: const TextStyle(
+                                color: Color(0xFF08C7D6),
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        )
+                      : Center(
+                          child: Text(
+                            widget.channel.name.isNotEmpty
+                                ? widget.channel.name[0].toUpperCase()
+                                : '?',
+                            style: const TextStyle(
+                              color: Color(0xFF08C7D6),
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Text(
+                  widget.channel.name,
+                  maxLines: 2,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    height: 1.2,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+  }
+
+  class _ChannelSearchDelegate extends SearchDelegate<Channel?> {
+    @override
+    ThemeData appBarTheme(BuildContext context) => ThemeData(
+      brightness: Brightness.dark,
+      scaffoldBackgroundColor: Colors.black,
+      appBarTheme: const AppBarTheme(backgroundColor: Color(0xFF111111)),
+      inputDecorationTheme: const InputDecorationTheme(border: InputBorder.none),
+    );
+
+    @override
+    List<Widget> buildActions(BuildContext context) => [
+      if (query.isNotEmpty)
+        IconButton(icon: const Icon(Icons.clear), onPressed: () => query = ''),
+    ];
+
+    @override
+    Widget buildLeading(BuildContext context) =>
+        IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => close(context, null));
+
+    @override
+    Widget buildResults(BuildContext context) => _buildSuggestions();
+
+    @override
+    Widget buildSuggestions(BuildContext context) => _buildSuggestions();
+
+    Widget _buildSuggestions() {
+      return StreamBuilder<List<Channel>>(
+        stream: FirestoreService.channelsStream(),
+        builder: (ctx, snap) {
+          final all = snap.data ?? [];
+          final filtered = query.isEmpty
+              ? all
+              : all.where((c) => c.name.toLowerCase().contains(query.toLowerCase())).toList();
+          return ListView.builder(
+            itemCount: filtered.length,
+            itemBuilder: (ctx, i) {
+              final ch = filtered[i];
+              return ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: const Color(0xFF1E1E1E),
+                  child: ch.logoUrl.isNotEmpty
+                      ? CachedNetworkImage(imageUrl: ch.logoUrl, fit: BoxFit.cover)
+                      : Text(ch.name[0], style: const TextStyle(color: Color(0xFF08C7D6))),
+                ),
+                title: Text(ch.name, style: const TextStyle(color: Colors.white)),
+                subtitle: Text(ch.category, style: const TextStyle(color: Colors.white38, fontSize: 12)),
+                onTap: () => close(ctx, ch),
+              );
+            },
+          );
+        },
       );
     }
   }
