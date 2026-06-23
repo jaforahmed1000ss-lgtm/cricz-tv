@@ -18,10 +18,9 @@ class Channel {
     this.order = 0,
   });
 
-  factory Channel.fromFirestore(DocumentSnapshot doc) {
-    final d = doc.data() as Map<String, dynamic>;
+  factory Channel.fromFirestore(Map<String, dynamic> d, String id) {
     return Channel(
-      id: doc.id,
+      id: id,
       name: d['name'] ?? '',
       category: d['category'] ?? 'Sports',
       streamUrl: d['streamUrl'] ?? '',
