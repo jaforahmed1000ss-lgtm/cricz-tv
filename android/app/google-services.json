@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "240014972669",
+    "project_id": "cricz-tv-9ba00",
+    "storage_bucket": "cricz-tv-9ba00.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:240014972669:android:9113146f0757bfc3001094",
+        "android_client_info": {
+          "package_name": "com.cricz.tv"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmZMyRpQLflLe8NpR_fAL4l3MTgoJ2QXI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
