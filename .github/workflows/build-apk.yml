@@ -37,15 +37,16 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Patch wakelock_plus for AGP 8.x
+      - name: Patch plugins for AGP 8.x
         run: |
-          FILE=$(find $HOME/.pub-cache/hosted/pub.dev/wakelock_plus-*/android -name 'build.gradle' 2>/dev/null | head -1)
-          if [ -n "$FILE" ]; then
-            echo "Patching: $FILE"
-            sed -i 's/flutter\.compileSdkVersion/36/g' "$FILE"
-            sed -i 's/flutter\.targetSdkVersion/36/g' "$FILE"
-            sed -i 's/flutter\.minSdkVersion/21/g' "$FILE"
-          fi
+          for f in $(find $HOME/.pub-cache/hosted/pub.dev -name 'build.gradle'); do
+            if grep -q 'flutter\.compileSdkVersion\|flutter\.targetSdkVersion\|flutter\.minSdkVersion' "$f"; then
+              echo "Patching $f"
+              sed -i 's/flutter\.compileSdkVersion/36/g' "$f"
+              sed -i 's/flutter\.targetSdkVersion/36/g' "$f"
+              sed -i 's/flutter\.minSdkVersion/21/g' "$f"
+            fi
+          done
 
       - name: Build Release APK
         run: flutter build apk --release --no-shrink
