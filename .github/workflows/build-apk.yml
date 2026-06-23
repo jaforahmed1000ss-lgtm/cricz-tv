@@ -37,19 +37,19 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
+      - name: Patch media_kit_video for Flutter 3.24 API
+        run: |
+          FILE=$(find $HOME/.pub-cache -name 'VideoOutput.java' -path '*/media_kit_video*' 2>/dev/null | head -1)
+          if [ -n "$FILE" ]; then
+            echo "Patching $FILE"
+            sed -i 's/onSurfaceAvailable/onSurfaceCreated/g' "$FILE"
+            sed -i 's/onSurfaceCleanup/onSurfaceDestroyed/g' "$FILE"
+            echo "Patch applied successfully"
+          else
+            echo "VideoOutput.java not found, skipping"
+          fi
 
-        - name: Patch media_kit_video for Flutter 3.24 API
-          run: |
-            FILE=$(find $HOME/.pub-cache -name "VideoOutput.java" -path "*/media_kit_video*" 2>/dev/null | head -1)
-            if [ -n "$FILE" ]; then
-              echo "Patching $FILE"
-              sed -i 's/onSurfaceAvailable/onSurfaceCreated/g' "$FILE"
-              sed -i 's/onSurfaceCleanup/onSurfaceDestroyed/g' "$FILE"
-              echo "Patch applied successfully"
-            else
-              echo "VideoOutput.java not found, skipping patch"
-            fi
-        - name: Patch plugins for AGP 8.x
+      - name: Patch plugins for AGP 8.x
         run: |
           for f in $(find $HOME/.pub-cache/hosted/pub.dev -name 'build.gradle'); do
             if grep -q 'flutter\.compileSdkVersion\|flutter\.targetSdkVersion\|flutter\.minSdkVersion' "$f"; then
