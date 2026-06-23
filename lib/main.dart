@@ -23,33 +23,35 @@ import 'package:flutter/material.dart';
       return MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'CricZ TV',
-        theme: ThemeData.dark().copyWith(
+        theme: ThemeData(
           useMaterial3: true,
-          scaffoldBackgroundColor: const Color(0xFF000000),
-          colorScheme: ColorScheme.dark(
-            primary: const Color(0xFF00D2FF),
-            secondary: const Color(0xFFFF4081),
-            surface: const Color(0xFF050B0F),
+          brightness: Brightness.dark,
+          scaffoldBackgroundColor: Colors.black,
+          colorScheme: const ColorScheme.dark(
+            primary: Color(0xFF08C7D6),
+            secondary: Color(0xFF08C7D6),
+            surface: Color(0xFF0D0D0D),
             onSurface: Colors.white,
-            surfaceContainerHighest: const Color(0xFF0A1219),
           ),
           appBarTheme: const AppBarTheme(
-            backgroundColor: Color(0xFF000000),
+            backgroundColor: Colors.black,
+            foregroundColor: Colors.white,
             elevation: 0,
-            scrolledUnderElevation: 0,
-            titleTextStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+            centerTitle: false,
+            titleTextStyle: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
             iconTheme: IconThemeData(color: Colors.white),
           ),
           bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-            backgroundColor: Color(0xFF050B0F),
-            selectedItemColor: Color(0xFF00D2FF),
+            backgroundColor: Color(0xFF0D0D0D),
+            selectedItemColor: Color(0xFF08C7D6),
             unselectedItemColor: Colors.white38,
-          ),
-          snackBarTheme: SnackBarThemeData(
-            backgroundColor: const Color(0xFF0A1825),
-            contentTextStyle: const TextStyle(color: Colors.white),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            behavior: SnackBarBehavior.floating,
+            type: BottomNavigationBarType.fixed,
+            selectedLabelStyle: TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+            unselectedLabelStyle: TextStyle(fontSize: 11),
           ),
         ),
         home: const SplashScreen(),
