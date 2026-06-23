@@ -1,27 +1,27 @@
 name: cricz_tv
-description: "CricZ TV - Live Sports Streaming Application"
-publish_to: 'none'
-version: 1.0.0+1
+  description: "CricZ TV - Live Sports Streaming Application"
+  publish_to: 'none'
+  version: 1.0.0+1
 
-environment:
-  sdk: '>=3.0.0 <4.0.0'
+  environment:
+    sdk: '>=3.3.0 <4.0.0'
 
-dependencies:
+  dependencies:
+    flutter:
+      sdk: flutter
+    cupertino_icons: ^1.0.6
+    media_kit: ^1.1.10+1
+    media_kit_video: ^1.2.4
+    media_kit_libs_video: ^1.0.4
+    http: ^1.2.1
+    wakelock_plus: ^1.2.8
+    shared_preferences: ^2.2.3
+
+  dev_dependencies:
+    flutter_test:
+      sdk: flutter
+    flutter_lints: ^3.0.0
+
   flutter:
-    sdk: flutter
-  cupertino_icons: ^1.0.6
-  media_kit: ^1.1.10+1
-  media_kit_video: ^1.2.4
-  media_kit_libs_video: ^1.0.4
-  firebase_core: ^3.1.0
-  cloud_firestore: ^5.0.1
-  http: ^1.2.1
-  wakelock_plus: ^1.2.8
-
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  flutter_lints: ^3.0.0
-
-flutter:
-  uses-material-design: true
+    uses-material-design: true
+  
