@@ -6,6 +6,7 @@ on:
   workflow_dispatch:
 
 env:
+  GRADLE_USER_HOME: /tmp/gradle-home
   GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.caching=false -Dorg.gradle.configuration-cache=false -Dfile.encoding=UTF-8"
 
 jobs:
