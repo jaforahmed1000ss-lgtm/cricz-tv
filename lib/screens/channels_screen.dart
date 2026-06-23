@@ -155,7 +155,7 @@ import 'package:flutter/material.dart';
           ),
         ),
         onLongPress: () async {
-          await FavoritesService.toggle(widget.channel.id, widget.channel.name);
+          await FavoritesService.toggleFavorite(widget.channel.id);
           final fav = await FavoritesService.isFavorite(widget.channel.id);
           if (mounted) {
             setState(() => _isFav = fav);
