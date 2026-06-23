@@ -38,6 +38,15 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
+      - name: Patch plugin build.gradle files for AGP 8.x
+        run: |
+          find $HOME/.pub-cache/hosted/pub.dev -name "build.gradle" -exec grep -l "android.flutter" {} \; | while read f; do
+            echo "Patching: $f"
+            sed -i "s/android\.flutter\.compileSdkVersion/36/g" "$f"
+            sed -i "s/android\.flutter\.targetSdkVersion/36/g" "$f"
+            sed -i "s/android\.flutter\.minSdkVersion/21/g" "$f"
+          done
+
       - name: Build Release APK
         run: flutter build apk --release --no-shrink
 
