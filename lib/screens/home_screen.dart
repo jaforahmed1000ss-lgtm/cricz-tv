@@ -29,22 +29,48 @@ class _MainNavigationHubState extends State<MainNavigationHub> {
     return Scaffold(
       body: IndexedStack(index: _idx, children: _screens),
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: Color(0xFF0E161B), width: 1.5)),
-        ),
-        child: BottomNavigationBar(
-          backgroundColor: const Color(0xFF050B0F),
-          selectedItemColor: const Color(0xFF00D2FF),
-          unselectedItemColor: Colors.grey,
-          currentIndex: _idx,
-          type: BottomNavigationBarType.fixed,
-          onTap: (i) => setState(() => _idx = i),
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.stadium), label: 'Matches'),
-            BottomNavigationBarItem(icon: Icon(Icons.live_tv), label: 'Live TV'),
-            BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: 'Categories'),
+        decoration: BoxDecoration(
+          color: const Color(0xFF050B0F),
+          border: const Border(top: BorderSide(color: Color(0xFF0E161B), width: 1.5)),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 20, offset: const Offset(0, -5)),
           ],
         ),
+        child: SafeArea(
+          child: SizedBox(
+            height: 60,
+            child: Row(children: [
+              _NavItem(icon: Icons.stadium_rounded, label: 'Live Events', selected: _idx == 0, onTap: () => setState(() => _idx = 0)),
+              _NavItem(icon: Icons.live_tv_rounded, label: 'Sports', selected: _idx == 1, onTap: () => setState(() => _idx = 1)),
+              _NavItem(icon: Icons.grid_view_rounded, label: 'Categories', selected: _idx == 2, onTap: () => setState(() => _idx = 2)),
+            ]),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _NavItem({required this.icon, required this.label, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = selected ? const Color(0xFF00D2FF) : Colors.grey.shade600;
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Icon(icon, color: color, size: 24),
+          const SizedBox(height: 4),
+          Text(label, style: TextStyle(color: color, fontSize: 10, fontWeight: selected ? FontWeight.w600 : FontWeight.normal)),
+        ]),
       ),
     );
   }
@@ -69,26 +95,25 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.black,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.white),
+          icon: const Icon(Icons.menu_rounded, color: Colors.white),
           onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
         title: Row(children: [
-          const Icon(Icons.live_tv, color: Color(0xFF00D2FF), size: 22),
+          const Icon(Icons.live_tv_rounded, color: Color(0xFF00D2FF), size: 22),
           const SizedBox(width: 8),
           const Text('CricZ TV',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20, letterSpacing: 0.3)),
           const SizedBox(width: 8),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(4)),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(5)),
             child: const Text('LIVE',
-                style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
           ),
         ]),
         actions: [
           IconButton(
-            icon: const Icon(Icons.admin_panel_settings, color: Colors.white54),
-            tooltip: 'Admin',
+            icon: const Icon(Icons.admin_panel_settings_rounded, color: Colors.white38, size: 22),
             onPressed: () => Navigator.push(
                 context, MaterialPageRoute(builder: (_) => const AdminLoginScreen())),
           ),
@@ -102,92 +127,52 @@ class _HomeScreenState extends State<HomeScreen> {
           final fifa = channels.where((c) => c.category == 'FIFA 2026').toList();
           final cricket = channels.where((c) => c.category == 'Cricket').toList();
           final sports = channels.where((c) => c.category == 'Sports').toList();
+          final football = channels.where((c) => c.category == 'Football').toList();
 
           return ListView(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.fromLTRB(14, 10, 14, 24),
             children: [
-              Container(
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF003D1F), Color(0xFF00A550)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Row(children: [
-                  const Text('⚽', style: TextStyle(fontSize: 36)),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      const Text('FIFA World Cup 2026',
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
-                      const Text('Watch all matches live!',
-                          style: TextStyle(color: Colors.white70, fontSize: 13)),
-                      const SizedBox(height: 8),
-                      ElevatedButton(
-                        onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const ChannelsScreen(filterCategory: 'FIFA 2026'))),
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Colors.green.shade800,
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            minimumSize: Size.zero),
-                        child: const Text('Watch Now',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                      ),
-                    ]),
-                  ),
-                ]),
+              _HeroBanner(
+                emoji: '⚽',
+                title: 'FIFA World Cup 2026',
+                subtitle: 'Watch all matches live, HD & free!',
+                gradient: const [Color(0xFF003D1F), Color(0xFF00A550)],
+                onTap: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const ChannelsScreen(filterCategory: 'FIFA 2026'))),
               ),
               const SizedBox(height: 16),
-
-              _sectionHeader('📅 Today\'s Matches',
-                  onTap: () => Navigator.push(
-                      context, MaterialPageRoute(builder: (_) => const MatchesScreen()))),
+              _sectionHeader(context, '📅  Today\'s Matches', () =>
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const MatchesScreen()))),
               const SizedBox(height: 10),
-              _matchSchedulePreview(),
+              _MatchPreviewCard(onTap: () =>
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const MatchesScreen()))),
               const SizedBox(height: 20),
-
               if (fifa.isNotEmpty) ...[
-                _sectionHeader('⚽ FIFA 2026 Channels',
-                    onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) =>
-                                const ChannelsScreen(filterCategory: 'FIFA 2026')))),
+                _sectionHeader(context, '⚽  FIFA 2026 Channels', () =>
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const ChannelsScreen(filterCategory: 'FIFA 2026')))),
                 const SizedBox(height: 10),
-                _channelRow(fifa.take(6).toList()),
+                _ChannelRow(channels: fifa.take(8).toList()),
                 const SizedBox(height: 20),
               ],
-
               if (cricket.isNotEmpty) ...[
-                _sectionHeader('🏏 Cricket Channels',
-                    onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) =>
-                                const ChannelsScreen(filterCategory: 'Cricket')))),
+                _sectionHeader(context, '🏏  Cricket Channels', () =>
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const ChannelsScreen(filterCategory: 'Cricket')))),
                 const SizedBox(height: 10),
-                _channelRow(cricket.take(6).toList()),
+                _ChannelRow(channels: cricket.take(8).toList()),
                 const SizedBox(height: 20),
               ],
-
-              if (sports.isNotEmpty) ...[
-                _sectionHeader('🏆 Sports Channels',
-                    onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) =>
-                                const ChannelsScreen(filterCategory: 'Sports')))),
+              if (football.isNotEmpty) ...[
+                _sectionHeader(context, '🏟️  Football Channels', () =>
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const ChannelsScreen(filterCategory: 'Football')))),
                 const SizedBox(height: 10),
-                _channelRow(sports.take(6).toList()),
+                _ChannelRow(channels: football.take(8).toList()),
                 const SizedBox(height: 20),
+              ],
+              if (sports.isNotEmpty) ...[
+                _sectionHeader(context, '🏆  Sports Channels', () =>
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const ChannelsScreen(filterCategory: 'Sports')))),
+                const SizedBox(height: 10),
+                _ChannelRow(channels: sports.take(8).toList()),
               ],
             ],
           );
@@ -196,50 +181,120 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _sectionHeader(String title, {VoidCallback? onTap}) {
+  Widget _sectionHeader(BuildContext ctx, String title, VoidCallback onTap) {
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
       Text(title,
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-      if (onTap != null)
-        GestureDetector(
-          onTap: onTap,
-          child: const Text('See all', style: TextStyle(color: Color(0xFF00D2FF), fontSize: 13)),
-        ),
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+      GestureDetector(
+        onTap: onTap,
+        child: const Row(mainAxisSize: MainAxisSize.min, children: [
+          Text('See all', style: TextStyle(color: Color(0xFF00D2FF), fontSize: 12)),
+          SizedBox(width: 2),
+          Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFF00D2FF), size: 12),
+        ]),
+      ),
     ]);
   }
+}
 
-  Widget _matchSchedulePreview() {
+class _HeroBanner extends StatelessWidget {
+  final String emoji;
+  final String title;
+  final String subtitle;
+  final List<Color> gradient;
+  final VoidCallback onTap;
+
+  const _HeroBanner({
+    required this.emoji,
+    required this.title,
+    required this.subtitle,
+    required this.gradient,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.push(
-          context, MaterialPageRoute(builder: (_) => const MatchesScreen())),
+      onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: const Color(0xFF02090F),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFF00D2FF).withOpacity(0.2)),
+          gradient: LinearGradient(
+            colors: gradient,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(color: gradient.last.withOpacity(0.25), blurRadius: 20, offset: const Offset(0, 6)),
+          ],
         ),
-        child: const Row(children: [
-          Icon(Icons.stadium, color: Color(0xFF00D2FF), size: 28),
-          SizedBox(width: 12),
+        child: Row(children: [
+          Text(emoji, style: const TextStyle(fontSize: 40)),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Live Match Schedules',
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-              Text('FIFA & Cricket matches with real scores',
-                  style: TextStyle(color: Colors.white54, fontSize: 12)),
+              Text(title,
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17)),
+              const SizedBox(height: 4),
+              Text(subtitle, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
+                child: Text('Watch Now',
+                    style: TextStyle(color: gradient.last, fontSize: 12, fontWeight: FontWeight.bold)),
+              ),
             ]),
           ),
-          Icon(Icons.arrow_forward_ios, color: Color(0xFF00D2FF), size: 16),
+          const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white38, size: 16),
         ]),
       ),
     );
   }
+}
 
-  Widget _channelRow(List<Channel> channels) {
+class _MatchPreviewCard extends StatelessWidget {
+  final VoidCallback onTap;
+  const _MatchPreviewCard({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: const Color(0xFF040C12),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFF00D2FF).withOpacity(0.18)),
+        ),
+        child: const Row(children: [
+          Icon(Icons.stadium_rounded, color: Color(0xFF00D2FF), size: 30),
+          SizedBox(width: 12),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('Live Match Schedules',
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+              Text('FIFA World Cup 2026 & Cricket fixtures',
+                  style: TextStyle(color: Colors.white38, fontSize: 12)),
+            ]),
+          ),
+          Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFF00D2FF), size: 14),
+        ]),
+      ),
+    );
+  }
+}
+
+class _ChannelRow extends StatelessWidget {
+  final List<Channel> channels;
+  const _ChannelRow({required this.channels});
+
+  @override
+  Widget build(BuildContext context) {
     return SizedBox(
-      height: 110,
+      height: 108,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: channels.length,
@@ -249,36 +304,35 @@ class _HomeScreenState extends State<HomeScreen> {
             onTap: () => Navigator.push(
                 ctx, MaterialPageRoute(builder: (_) => PlayerScreen(channel: ch))),
             child: Container(
-              width: 90,
+              width: 86,
               margin: const EdgeInsets.only(right: 10),
               decoration: BoxDecoration(
-                  color: const Color(0xFF0E161B),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.white12)),
+                color: const Color(0xFF060E14),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white.withOpacity(0.07)),
+              ),
               child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                 Container(
-                  width: 46,
-                  height: 46,
+                  width: 48,
+                  height: 48,
                   decoration: BoxDecoration(
-                      color: const Color(0xFF1A2530),
-                      borderRadius: BorderRadius.circular(8)),
+                    color: const Color(0xFF0E1C26),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                   child: ch.logoUrl.isNotEmpty
                       ? ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(10),
                           child: Image.network(ch.logoUrl,
                               fit: BoxFit.contain,
                               errorBuilder: (_, __, ___) =>
-                                  const Icon(Icons.live_tv, color: Color(0xFF00D2FF), size: 24)))
-                      : const Icon(Icons.live_tv, color: Color(0xFF00D2FF), size: 24),
+                                  const Icon(Icons.live_tv_rounded, color: Color(0xFF00D2FF), size: 26)))
+                      : const Icon(Icons.live_tv_rounded, color: Color(0xFF00D2FF), size: 26),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 7),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: Text(ch.name,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600),
+                      style: const TextStyle(color: Colors.white, fontSize: 9.5, fontWeight: FontWeight.w600),
                       textAlign: TextAlign.center,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis),
