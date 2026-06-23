@@ -5,6 +5,10 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+defaults:
+  run:
+    working-directory: flutter_app
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -39,15 +43,15 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: CricZ-TV-v${{ github.run_number }}
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: flutter_app/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
 
-      - name: Build APK (Debug — for quick testing)
+      - name: Build APK (Debug)
         run: flutter build apk --debug
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: CricZ-TV-debug-v${{ github.run_number }}
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          path: flutter_app/build/app/outputs/flutter-apk/app-debug.apk
           retention-days: 7
