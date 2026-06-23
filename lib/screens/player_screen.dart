@@ -74,12 +74,6 @@ class _PlayerScreenState extends State<PlayerScreen> {
     setState(() { _loading = true; _error = false; });
     try {
       await _player.stop();
-      await _player.setProperty('cache', 'yes');
-      await _player.setProperty('cache-secs', '30');
-      await _player.setProperty('demuxer-max-bytes', '128MiB');
-      await _player.setProperty('demuxer-readahead-secs', '20');
-      await _player.setProperty('stream-buffer-size', '64MiB');
-      await _player.setProperty('hls-bitrate', 'max');
       await _player.open(
         Media(widget.channel.streamUrl, httpHeaders: {
           'User-Agent': 'Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 Chrome/114.0 Mobile Safari/537.36',
