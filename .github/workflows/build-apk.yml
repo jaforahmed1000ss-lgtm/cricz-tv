@@ -40,17 +40,27 @@ name: Build CricZ TV APK
 
         - name: Patch plugin build.gradle files for AGP 8.x
           run: |
-            find $HOME/.pub-cache/hosted/pub.dev -name "build.gradle" | while read f; do
-              if grep -q "flutter\.compileSdkVersion\|flutter\.targetSdkVersion\|flutter\.minSdkVersion\|android\.flutter\." "$f"; then
-                echo "Patching: $f"
-                sed -i "s/flutter\.compileSdkVersion/36/g" "$f"
-                sed -i "s/flutter\.targetSdkVersion/36/g" "$f"
-                sed -i "s/flutter\.minSdkVersion/21/g" "$f"
-                sed -i "s/android\.flutter\.compileSdkVersion/36/g" "$f"
-                sed -i "s/android\.flutter\.targetSdkVersion/36/g" "$f"
-                sed -i "s/android\.flutter\.minSdkVersion/21/g" "$f"
-              fi
-            done
+            python3 - <<'EOF'
+            import os, re, glob
+
+            patterns = [
+                (r'flutter.compileSdkVersion', '36'),
+                (r'flutter.targetSdkVersion', '36'),
+                (r'flutter.minSdkVersion', '21'),
+            ]
+
+            pub_cache = os.path.expanduser('~/.pub-cache/hosted/pub.dev')
+            for gradle_file in glob.glob(f'{pub_cache}/**/build.gradle', recursive=True):
+                with open(gradle_file, 'r') as f:
+                    content = f.read()
+                new_content = content
+                for pattern, replacement in patterns:
+                    new_content = re.sub(pattern, replacement, new_content)
+                if new_content != content:
+                    print(f'Patched: {gradle_file}')
+                    with open(gradle_file, 'w') as f:
+                        f.write(new_content)
+            EOF
 
         - name: Build Release APK
           run: flutter build apk --release --no-shrink
