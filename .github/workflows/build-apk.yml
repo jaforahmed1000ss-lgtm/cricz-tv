@@ -5,6 +5,9 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+env:
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=2g -Dfile.encoding=UTF-8"
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -30,6 +33,11 @@ jobs:
         uses: nttld/setup-ndk@v1
         with:
           ndk-version: r27
+
+      - name: Clean Gradle cache
+        run: |
+          rm -rf ~/.gradle/caches/jars-*
+          rm -rf ~/.gradle/caches/modules-*
 
       - name: Get dependencies
         run: flutter pub get
