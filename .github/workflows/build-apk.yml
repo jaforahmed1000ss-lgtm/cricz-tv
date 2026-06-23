@@ -39,28 +39,23 @@ name: Build CricZ TV APK
           run: flutter pub get
 
         - name: Patch plugin build.gradle files for AGP 8.x
+          shell: python3 {0}
           run: |
-            python3 - <<'EOF'
             import os, re, glob
-
             patterns = [
-                (r'flutter.compileSdkVersion', '36'),
-                (r'flutter.targetSdkVersion', '36'),
-                (r'flutter.minSdkVersion', '21'),
+              ('flutter.compileSdkVersion', '36'),
+              ('flutter.targetSdkVersion', '36'),
+              ('flutter.minSdkVersion', '21'),
             ]
-
             pub_cache = os.path.expanduser('~/.pub-cache/hosted/pub.dev')
-            for gradle_file in glob.glob(f'{pub_cache}/**/build.gradle', recursive=True):
-                with open(gradle_file, 'r') as f:
-                    content = f.read()
-                new_content = content
-                for pattern, replacement in patterns:
-                    new_content = re.sub(pattern, replacement, new_content)
-                if new_content != content:
-                    print(f'Patched: {gradle_file}')
-                    with open(gradle_file, 'w') as f:
-                        f.write(new_content)
-            EOF
+            for f in glob.glob(pub_cache + '/**/build.gradle', recursive=True):
+              text = open(f).read()
+              new = text
+              for old, val in patterns:
+                new = new.replace(old, val)
+              if new != text:
+                print('Patched:', f)
+                open(f, 'w').write(new)
 
         - name: Build Release APK
           run: flutter build apk --release --no-shrink
